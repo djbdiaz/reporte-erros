@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de Erro — Chat Inteligente</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --border: #2a2d34;
+    --border-hover: #454954;
+    --accent: #ff4d4d;
+    --accent-dim: rgba(255, 77, 77, 0.12);
+    --text: #e8eaf0;
+    --muted: #6b7180;
+    --success: #3ecf8e;
+    --success-dim: rgba(62, 207, 142, 0.1);
+    --font-head: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 580px;
+  }
+
+  .header {
+    margin-bottom: 40px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(255, 77, 77, 0.3);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: var(--font-head);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  label span {
+    color: var(--accent);
+    margin-left: 2px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  textarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+    resize: none;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted);
+    opacity: 0.6;
+  }
+
+  textarea {
+    min-height: 120px;
+  }
+
+  .upload-area {
+    background: var(--bg);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+
+  .upload-area:hover,
+  .upload-area.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .upload-area input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .upload-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .upload-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .upload-text strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  .file-item button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.2s;
+  }
+
+  .file-item button:hover { color: var(--accent); }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+  }
+
+  .submit-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    font-family: var(--font-head);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 14px 24px;
+    width: 100%;
+    transition: opacity 0.2s, transform 0.1s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit-btn:hover { opacity: 0.9; }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .submit-btn .btn-text { transition: opacity 0.2s; }
+  .submit-btn .btn-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .submit-btn.loading .btn-text { opacity: 0; }
+  .submit-btn.loading .btn-loading { opacity: 1; }
+
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .success-state {
+    display: none;
+    text-align: center;
+    padding: 40px 24px;
+  }
+
+  .success-state.show { display: block; }
+  .form-content.hide { display: none; }
+
+  .success-icon {
+    width: 56px;
+    height: 56px;
+    background: var(--success-dim);
+    border: 1px solid rgba(62, 207, 142, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 24px;
+  }
+
+  .success-title {
+    font-family: var(--font-head);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--success);
+    margin-bottom: 8px;
+  }
+
+  .success-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .new-report-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 10px 20px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .new-report-btn:hover {
+    border-color: var(--border-hover);
+    color: var(--text);
+  }
+
+  .error-msg {
+    font-size: 12px;
+    color: var(--accent);
+    margin-top: 4px;
+    display: none;
+  }
+
+  .field.error input,
+  .field.error textarea {
+    border-color: var(--accent);
+  }
+
+  .field.error .error-msg { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">SISTEMA DE REPORTE</div>
+    <h1>Reportar erro</h1>
+    <p class="subtitle">Preencha os campos abaixo com as informações do erro.<br>O time de QA será notificado automaticamente.</p>
+  </div>
+
+  <div class="form-card">
+    <div class="form-content">
+      <div class="field" id="field-titulo">
+        <label>Título do erro <span>*</span></label>
+        <input type="text" id="titulo" placeholder="Ex: Bot não responde no WhatsApp" />
+        <span class="error-msg">Por favor, preencha o título.</span>
+      </div>
+
+      <div class="field" id="field-descricao">
+        <label>Descrição <span>*</span></label>
+        <textarea id="descricao" placeholder="Descreva o erro com o máximo de detalhes possível. O que aconteceu? Quando? Como reproduzir?"></textarea>
+        <span class="error-msg">Por favor, descreva o erro.</span>
+      </div>
+
+      <div class="field" id="field-email">
+        <label>Email ou ID da conta <span>*</span></label>
+        <input type="text" id="email_id" placeholder="Ex: cliente@empresa.com ou ID #12345" />
+        <span class="error-msg">Por favor, informe o email ou ID.</span>
+      </div>
+
+      <div class="field">
+        <label>Prints / Anexos</label>
+        <div class="upload-area" id="upload-area">
+          <input type="file" id="arquivos" multiple accept="image/*,.pdf" />
+          <div class="upload-icon">📎</div>
+          <div class="upload-text">
+            <strong>Clique para anexar</strong> ou arraste os arquivos aqui<br>
+            PNG, JPG, PDF — máx. 10MB por arquivo
+          </div>
+        </div>
+        <div class="file-list" id="file-list"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <button class="submit-btn" id="submit-btn" onclick="enviarReporte()">
+        <span class="btn-text">Enviar reporte</span>
+        <span class="btn-loading"><div class="spinner"></div></span>
+      </button>
+    </div>
+
+    <div class="success-state" id="success-state">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Reporte enviado!</div>
+      <p class="success-text">O time de QA foi notificado e irá analisar o erro em breve.</p>
+      <button class="new-report-btn" onclick="novoReporte()">Enviar novo reporte</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const WEBHOOK_URL = 'https://n8n.nexbyb.com/webhook/0c5c9c58-a50e-4c7e-ab91-00a146f97582';
+
+  let arquivosSelecionados = [];
+
+  const uploadArea = document.getElementById('upload-area');
+  const fileInput = document.getElementById('arquivos');
+  const fileList = document.getElementById('file-list');
+
+  uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+  uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+  uploadArea.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadArea.classList.remove('drag-over');
+    adicionarArquivos(e.dataTransfer.files);
+  });
+
+  fileInput.addEventListener('change', () => adicionarArquivos(fileInput.files));
+
+  function adicionarArquivos(files) {
+    for (const file of files) {
+      if (!arquivosSelecionados.find(f => f.name === file.name)) {
+        arquivosSelecionados.push(file);
+      }
+    }
+    renderizarArquivos();
+  }
+
+  function renderizarArquivos() {
+    fileList.innerHTML = '';
+    arquivosSelecionados.forEach((file, i) => {
+      const item = document.createElement('div');
+      item.className = 'file-item';
+      item.innerHTML = `<span>📄 ${file.name}</span><button onclick="removerArquivo(${i})">×</button>`;
+      fileList.appendChild(item);
+    });
+  }
+
+  function removerArquivo(i) {
+    arquivosSelecionados.splice(i, 1);
+    renderizarArquivos();
+  }
+
+  function validar() {
+    let valido = true;
+    const campos = [
+      { id: 'field-titulo', input: 'titulo' },
+      { id: 'field-descricao', input: 'descricao' },
+      { id: 'field-email', input: 'email_id' },
+    ];
+    campos.forEach(({ id, input }) => {
+      const field = document.getElementById(id);
+      const val = document.getElementById(input).value.trim();
+      if (!val) { field.classList.add('error'); valido = false; }
+      else field.classList.remove('error');
+    });
+    return valido;
+  }
+
+  async function enviarReporte() {
+    if (!validar()) return;
+
+    const btn = document.getElementById('submit-btn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    const titulo = document.getElementById('titulo').value.trim();
+    const descricao = document.getElementById('descricao').value.trim();
+    const email_id = document.getElementById('email_id').value.trim();
+
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ titulo, descricao, email_id, anexos: arquivosSelecionados.map(f => f.name) })
+      });
+
+      document.querySelector('.form-content').classList.add('hide');
+      document.getElementById('success-state').classList.add('show');
+    } catch (err) {
+      alert('Erro ao enviar. Tente novamente.');
+    } finally {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  }
+
+  function novoReporte() {
+    document.getElementById('titulo').value = '';
+    document.getElementById('descricao').value = '';
+    document.getElementById('email_id').value = '';
+    arquivosSelecionados = [];
+    renderizarArquivos();
+    document.querySelector('.form-content').classList.remove('hide');
+    document.getElementById('success-state').classList.remove('show');
+  }
+</script>
+</body>
+</html>
